@@ -12,7 +12,7 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 
-/.idea
+.idea
 composer.lock
 package-lock.json
 
