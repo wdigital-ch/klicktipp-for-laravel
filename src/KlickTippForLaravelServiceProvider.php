@@ -26,7 +26,7 @@ class KlickTippForLaravelServiceProvider extends ServiceProvider
 		 */
 		if ($this->app->runningInConsole()) {
 			$this->publishes([
-				__DIR__.'/../config/config.php' => config_path('klicktipp.php'),
+				__DIR__.'/../config/klicktipp.php' => config_path('klicktipp.php'),
 			], 'config');
 		}
 	}
@@ -37,6 +37,6 @@ class KlickTippForLaravelServiceProvider extends ServiceProvider
 	public function register()
 	{
 		// Automatically apply the package configuration
-		$this->mergeConfigFrom(__DIR__.'/../config/config.php', 'klicktipp.php');
+		$this->mergeConfigFrom(__DIR__.'/../config/klicktipp.php', 'klicktipp');
 	}
 }
