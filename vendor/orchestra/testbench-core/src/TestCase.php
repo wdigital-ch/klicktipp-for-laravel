@@ -2,20 +2,29 @@
 
 namespace Orchestra\Testbench;
 
-use Illuminate\Foundation\Testing;
+use Illuminate\Foundation\Testing\Concerns\InteractsWithAuthentication;
+use Illuminate\Foundation\Testing\Concerns\InteractsWithConsole;
+use Illuminate\Foundation\Testing\Concerns\InteractsWithContainer;
+use Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase;
+use Illuminate\Foundation\Testing\Concerns\InteractsWithExceptionHandling;
+use Illuminate\Foundation\Testing\Concerns\InteractsWithSession;
+use Illuminate\Foundation\Testing\Concerns\InteractsWithTime;
+use Illuminate\Foundation\Testing\Concerns\MakesHttpRequests;
+use Illuminate\Foundation\Testing\Concerns\MocksApplicationServices;
 use PHPUnit\Framework\TestCase as PHPUnit;
 
 abstract class TestCase extends PHPUnit implements Contracts\TestCase
 {
     use Concerns\Testing,
-        Testing\Concerns\InteractsWithAuthentication,
-        Testing\Concerns\InteractsWithConsole,
-        Testing\Concerns\InteractsWithContainer,
-        Testing\Concerns\InteractsWithDatabase,
-        Testing\Concerns\InteractsWithExceptionHandling,
-        Testing\Concerns\InteractsWithSession,
-        Testing\Concerns\InteractsWithTime,
-        Testing\Concerns\MakesHttpRequests;
+        InteractsWithAuthentication,
+        InteractsWithConsole,
+        InteractsWithContainer,
+        InteractsWithDatabase,
+        InteractsWithExceptionHandling,
+        InteractsWithSession,
+        InteractsWithTime,
+        MakesHttpRequests,
+        MocksApplicationServices;
 
     /**
      * The base URL to use while testing the application.
@@ -23,20 +32,6 @@ abstract class TestCase extends PHPUnit implements Contracts\TestCase
      * @var string
      */
     protected $baseUrl = 'http://localhost';
-
-    /**
-     * Automatically loads environment file if available.
-     *
-     * @var bool
-     */
-    protected $loadEnvironmentVariables = true;
-
-    /**
-     * Automatically enables package discoveries.
-     *
-     * @var bool
-     */
-    protected $enablesPackageDiscoveries = false;
 
     /**
      * Setup the test environment.

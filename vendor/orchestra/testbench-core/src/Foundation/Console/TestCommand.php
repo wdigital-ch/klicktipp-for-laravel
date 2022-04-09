@@ -15,8 +15,6 @@ class TestCommand extends Command
      */
     protected $signature = 'package:test
         {--without-tty : Disable output to TTY}
-        {--coverage : Indicates whether the coverage information should be collected}
-        {--min= : Indicates the minimum threshold enforcement for coverage}
         {--parallel : Indicates if the tests should run in parallel}
         {--recreate-databases : Indicates if the test databases should be re-created}
     ';
@@ -54,12 +52,10 @@ class TestCommand extends Command
         $options = Collection::make($options)
             ->merge(['--printer=NunoMaduro\\Collision\\Adapters\\Phpunit\\Printer'])
             ->reject(static function ($option) {
-                return Str::startsWith($option, '--env=')
-                    || $option == '--coverage'
-                    || Str::startsWith($option, '--min');
+                return Str::startsWith($option, '--env=');
             })->values()->all();
 
-        return array_merge($this->commonArguments(), ['--configuration=./'], $options);
+        return array_merge(['--configuration=./'], $options);
     }
 
     /**
@@ -74,9 +70,6 @@ class TestCommand extends Command
         $options = Collection::make($options)
             ->reject(static function ($option) {
                 return Str::startsWith($option, '--env=')
-                    || $option == '--coverage'
-                    || Str::startsWith($option, '--min')
-                    || Str::startsWith($option, '-p')
                     || Str::startsWith($option, '--parallel')
                     || Str::startsWith($option, '--recreate-databases');
             })->values()->all();

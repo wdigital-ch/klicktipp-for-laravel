@@ -116,9 +116,12 @@ trait InteractsWithPublishedFiles
     {
         $this->app['files']->delete(
             Collection::make($this->files ?? [])
-                ->transform(fn ($file) => $this->app->basePath($file))
-                ->filter(fn ($file) => $this->app['files']->exists($file))
-                ->all()
+                ->transform(function ($file) {
+                    return $this->app->basePath($file);
+                })
+                ->filter(function ($file) {
+                    return $this->app['files']->exists($file);
+                })->all()
         );
     }
 
@@ -139,8 +142,9 @@ trait InteractsWithPublishedFiles
     {
         $this->app['files']->delete(
             Collection::make($this->app['files']->files($this->app->databasePath('migrations')))
-                ->filter(fn ($file) => Str::endsWith($file, '.php'))
-                ->all()
+                ->filter(function ($file) {
+                    return Str::endsWith($file, '.php');
+                })->all()
         );
     }
 }

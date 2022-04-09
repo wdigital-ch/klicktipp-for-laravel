@@ -20,7 +20,9 @@ trait HandlesRoutes
         $this->defineRoutes($this->app['router']);
 
         $this->app['router']->middleware('web')
-            ->group(fn ($router) => $this->defineWebRoutes($router));
+            ->group(function ($router) {
+                $this->defineWebRoutes($router);
+            });
 
         if (method_exists($this, 'parseTestMethodAnnotations')) {
             $this->parseTestMethodAnnotations($this->app, 'define-route');

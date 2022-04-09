@@ -8,7 +8,7 @@ use Illuminate\Contracts\Config\Repository as RepositoryContract;
 use Illuminate\Contracts\Foundation\Application;
 use Symfony\Component\Finder\Finder;
 
-final class LoadConfiguration
+class LoadConfiguration
 {
     /**
      * Bootstrap the given application.
@@ -34,7 +34,7 @@ final class LoadConfiguration
      *
      * @return void
      */
-    private function loadConfigurationFiles(Application $app, RepositoryContract $config): void
+    protected function loadConfigurationFiles(Application $app, RepositoryContract $config): void
     {
         foreach ($this->getConfigurationFiles($app) as $key => $path) {
             $config->set($key, require $path);
@@ -48,7 +48,7 @@ final class LoadConfiguration
      *
      * @return \Generator
      */
-    private function getConfigurationFiles(Application $app): Generator
+    protected function getConfigurationFiles(Application $app): Generator
     {
         if (! is_dir($path = $app->basePath('config'))) {
             $path = realpath(__DIR__.'/../../laravel/config');

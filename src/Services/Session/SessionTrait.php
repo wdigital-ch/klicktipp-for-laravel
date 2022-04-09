@@ -5,7 +5,7 @@
  * @developer Florian Würtenberger <florian@wdigital.ch>
  */
 
-namespace Wdigital\KlicktippForLaravel\Services\Session;
+namespace WDigital\KlickTippForLaravel\Services\Session;
 
 use Illuminate\Support\Facades\Http;
 
@@ -23,14 +23,14 @@ trait SessionTrait
 
 		$authSession = Http::withOptions(
 			[
-				'base_uri' => config('api_base_url'),
+				'base_uri' => config('klicktipp-for-laravel.api_base_url'),
 
 			]
 		)->withHeaders($httpHeaders)->post(
 			'account/login',
 			[
-				'username'     => config('api_username'),
-				'password' => config('api_password'),
+				'username'     => config('klicktipp-for-laravel.api_username'),
+				'password' => config('klicktipp-for-laravel.api_password'),
 			]);
 		return [
 			'sessionIdentifier' => $authSession->header('cookie'),

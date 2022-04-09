@@ -3,20 +3,45 @@
 namespace Orchestra\Testbench;
 
 use Illuminate\Testing\PendingCommand;
-use Orchestra\Testbench\Foundation\Application;
 
 /**
  * Create Laravel application instance.
  *
  * @param  string|null  $basePath
- * @param  callable(\Illuminate\Foundation\Application):void|null  $resolvingCallback
- * @param  array  $options
- *
- * @return \Orchestra\Testbench\Foundation\Application
+ * @return object
  */
-function container(?string $basePath = null, ?callable $resolvingCallback = null, array $options = [])
+function container(?string $basePath = null)
 {
-    return tap(new Application($basePath, $resolvingCallback))->configure($options);
+    return new class($basePath) {
+        use Concerns\CreatesApplication;
+
+        /**
+         * The default base path.
+         *
+         * @var string|null
+         */
+        protected $basePath;
+
+        /**
+         * Construc a new container.
+         *
+         * @param  string|null  $basePath
+         */
+        public function __construct(?string $basePath)
+        {
+            $this->basePath = $basePath;
+        }
+
+        /**
+         * Get base path.
+         *
+         * @return string
+         */
+        protected function getBasePath()
+        {
+            return $this->basePath ?? static::applicationBasePath();
+        }
+    };
 }
 
 /**

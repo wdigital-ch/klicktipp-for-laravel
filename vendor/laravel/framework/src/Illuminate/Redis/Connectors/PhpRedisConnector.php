@@ -84,11 +84,7 @@ class PhpRedisConnector implements Connector
             $this->establishConnection($client, $config);
 
             if (! empty($config['password'])) {
-                if (isset($config['username']) && $config['username'] !== '' && is_string($config['password'])) {
-                    $client->auth([$config['username'], $config['password']]);
-                } else {
-                    $client->auth($config['password']);
-                }
+                $client->auth($config['password']);
             }
 
             if (isset($config['database'])) {
@@ -148,8 +144,10 @@ class PhpRedisConnector implements Connector
             $parameters[] = Arr::get($config, 'read_timeout', 0.0);
         }
 
-        if (version_compare(phpversion('redis'), '5.3.0', '>=') && ! is_null($context = Arr::get($config, 'context'))) {
-            $parameters[] = $context;
+        if (version_compare(phpversion('redis'), '5.3.0', '>=')) {
+            if (! is_null($context = Arr::get($config, 'context'))) {
+                $parameters[] = $context;
+            }
         }
 
         $client->{($persistent ? 'pconnect' : 'connect')}(...$parameters);
@@ -176,8 +174,10 @@ class PhpRedisConnector implements Connector
             $parameters[] = $options['password'] ?? null;
         }
 
-        if (version_compare(phpversion('redis'), '5.3.2', '>=') && ! is_null($context = Arr::get($options, 'context'))) {
-            $parameters[] = $context;
+        if (version_compare(phpversion('redis'), '5.3.2', '>=')) {
+            if (! is_null($context = Arr::get($options, 'context'))) {
+                $parameters[] = $context;
+            }
         }
 
         return tap(new RedisCluster(...$parameters), function ($client) use ($options) {

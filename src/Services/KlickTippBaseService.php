@@ -5,13 +5,13 @@
  * @developer Florian Würtenberger <florian@wdigital.ch>
  */
 
-namespace Wdigital\KlicktippForLaravel\Services;
+namespace WDigital\KlickTippForLaravel\Services;
 
-use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
-use Wdigital\KlicktippForLaravel\Services\Session\SessionTrait;
+use Illuminate\Http\Client\PendingRequest;
+use WDigital\KlickTippForLaravel\Services\Session\SessionTrait;
 
-class BaseService
+class KlickTippBaseService
 {
 	use SessionTrait;
 
@@ -75,7 +75,7 @@ class BaseService
 
 		$this->httpClient = Http::withOptions(
 			[
-				'base_uri' => config('api.base_url'),
+				'base_uri' => config('klicktipp-for-laravel.api.base_url'),
 			]
 		)
 			->withHeaders($httpHeaders);

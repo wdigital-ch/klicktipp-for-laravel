@@ -102,15 +102,6 @@ interface Laravel
     protected function resolveApplicationConfiguration($app);
 
     /**
-     * Resolve application rate limiting configuration.
-     *
-     * @param  \Illuminate\Foundation\Application  $app
-     *
-     * @return void
-     */
-    protected function resolveApplicationRateLimiting($app);
-
-    /**
      * Resolve application core implementation.
      *
      * @param  \Illuminate\Foundation\Application  $app

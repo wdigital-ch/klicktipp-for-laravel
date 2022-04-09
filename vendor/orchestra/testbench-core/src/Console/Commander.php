@@ -10,8 +10,7 @@ use Illuminate\Contracts\Console\Kernel as ConsoleKernel;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Env;
-use function Orchestra\Testbench\container;
-use Orchestra\Testbench\Foundation\Application;
+use Orchestra\Testbench\Concerns\CreatesApplication;
 use Orchestra\Testbench\Foundation\TestbenchServiceProvider;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -20,6 +19,11 @@ use Throwable;
 
 class Commander
 {
+    use CreatesApplication {
+        resolveApplication as protected resolveApplicationFromTrait;
+        getBasePath as protected getBasePathFromTrait;
+    }
+
     /**
      * Application instance.
      *
@@ -51,16 +55,6 @@ class Commander
     {
         $this->config = $config;
         $this->workingPath = $workingPath;
-    }
-
-    /**
-     * Get Application base path.
-     *
-     * @return string
-     */
-    public static function applicationBasePath()
-    {
-        return container()::applicationBasePath();
     }
 
     /**
@@ -98,29 +92,46 @@ class Commander
         if (! $this->app) {
             $this->createSymlinkToVendorPath();
 
-            $this->app = Application::create($this->getBasePath(), $this->resolveApplicationCallback(), [
-                'extra' => [
-                    'providers' => $this->config['providers'] ?? [],
-                    'dont-discover' => $this->config['dont-discover'] ?? [],
-                ],
-            ]);
+            $this->app = $this->createApplication();
         }
 
         return $this->app;
     }
 
     /**
+     * Ignore package discovery from.
+     *
+     * @return array
+     */
+    public function ignorePackageDiscoveriesFrom()
+    {
+        return $this->config['dont-discover'] ?? [];
+    }
+
+    /**
+     * Get package providers.
+     *
+     * @param  \Illuminate\Foundation\Application  $app
+     *
+     * @return array
+     */
+    protected function getPackageProviders($app)
+    {
+        return $this->config['providers'] ?? [];
+    }
+
+    /**
      * Resolve application implementation.
      *
-     * @return \Closure
+     * @return \Illuminate\Foundation\Application
      */
-    protected function resolveApplicationCallback()
+    protected function resolveApplication()
     {
-        return function ($app) {
+        return tap($this->resolveApplicationFromTrait(), function ($app) {
             $this->createDotenv()->load();
 
             $app->register(TestbenchServiceProvider::class);
-        };
+        });
     }
 
     /**
@@ -159,7 +170,7 @@ class Commander
             });
         }
 
-        return static::applicationBasePath();
+        return $this->getBasePathFromTrait();
     }
 
     /**
@@ -169,7 +180,7 @@ class Commander
     {
         $workingVendorPath = $this->workingPath.'/vendor';
 
-        tap(Application::create($this->getBasePath(), $this->resolveApplicationCallback()), static function ($laravel) use ($workingVendorPath) {
+        tap($this->resolveApplication(), static function ($laravel) use ($workingVendorPath) {
             $filesystem = new Filesystem();
 
             $laravelVendorPath = $laravel->basePath('vendor');
