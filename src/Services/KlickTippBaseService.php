@@ -59,16 +59,6 @@ class KlickTippBaseService
 			'Content-Type'          => 'application/json',
 		];
 
-		/*
-		 * Checks if the current instance is in development.
-		 * If yes, the demo mode is set
-		 */
-		if (config('app.env') === 'local'
-			|| config('app.debug') === true
-		) {
-			$httpHeaders['X-Domainrobot-Demo'] = true;
-		}
-
 		$this->httpClient = Http::withOptions(
 			[
 				'base_uri' => config('klicktipp-for-laravel.api_base_url'),
