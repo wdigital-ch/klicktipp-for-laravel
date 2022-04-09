@@ -69,13 +69,9 @@ class KlickTippBaseService
 			$httpHeaders['X-Domainrobot-Demo'] = true;
 		}
 
-		if (!empty($this->sessionIdentifier)) {
-			$httpHeaders['X-Domainrobot-SessionId'] = $this->sessionIdentifier;
-		}
-
 		$this->httpClient = Http::withOptions(
 			[
-				'base_uri' => config('klicktipp-for-laravel.api.base_url'),
+				'base_uri' => config('klicktipp-for-laravel.api_base_url'),
 			]
 		)
 			->withHeaders($httpHeaders);

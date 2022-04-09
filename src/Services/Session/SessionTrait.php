@@ -32,6 +32,7 @@ trait SessionTrait
 				'username'     => config('klicktipp-for-laravel.api_username'),
 				'password' => config('klicktipp-for-laravel.api_password'),
 			]);
+		dd($authSession->headers());
 		return [
 			'sessionIdentifier' => $authSession->header('cookie'),
 			'sessionStart'      => microtime(true),
