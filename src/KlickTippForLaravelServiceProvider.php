@@ -17,34 +17,26 @@ use Illuminate\Support\ServiceProvider;
 class KlickTippForLaravelServiceProvider extends ServiceProvider
 {
 	/**
-	 * Register any application services.
-	 *
-	 * @return void
-	 */
-	public function register()
-	{
-		//
-	}
-
-	/**
-	 * Bootstrap any application services.
-	 *
-	 * @return void
+	 * Bootstrap the application services.
 	 */
 	public function boot()
 	{
-		//Publishes config
-		$this->publishConfig();
+		/*
+		 * Optional methods to load your package assets
+		 */
+		if ($this->app->runningInConsole()) {
+			$this->publishes([
+				__DIR__.'/../config/config.php' => config_path('klicktipp.php'),
+			], 'config');
+		}
 	}
 
 	/**
-	 * Load and publishes the configuration file.
+	 * Register the application services.
 	 */
-	public function publishConfig()
+	public function register()
 	{
-		$this->publishes([
-			__DIR__ . '/../config/klicktipp-for-laravel.php' => config_path('klicktipp-for-laravel.php'),
-		], 'klicktipp-config');
+		// Automatically apply the package configuration
+		$this->mergeConfigFrom(__DIR__.'/../config/config.php', 'klicktipp.php');
 	}
-
 }

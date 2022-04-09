@@ -61,7 +61,7 @@ class KlickTippBaseService
 
 		$this->httpClient = Http::withOptions(
 			[
-				'base_uri' => config('klicktipp-for-laravel.api_base_url'),
+				'base_uri' => config('klicktipp.api_base_url'),
 			]
 		)
 			->withHeaders($httpHeaders);

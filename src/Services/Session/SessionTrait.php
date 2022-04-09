@@ -21,16 +21,11 @@ trait SessionTrait
 			'Content-Type'          => 'application/json',
 		];
 
-		$authSession = Http::withOptions(
+		$authSession = Http::withHeaders($httpHeaders)->post(
+			config('klicktipp.api_base_url') . '/account/login',
 			[
-				'base_uri' => config('klicktipp-for-laravel.api_base_url'),
-
-			]
-		)->withHeaders($httpHeaders)->post(
-			'account/login',
-			[
-				'username'     => config('klicktipp-for-laravel.api_username'),
-				'password' => config('klicktipp-for-laravel.api_password'),
+				'username' => config('klicktipp.api_username'),
+				'password' => config('klicktipp.api_password'),
 			]);
 
 		return [
