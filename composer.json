@@ -1,0 +1,55 @@
+{
+    "name": "wdigital/klicktipp-for-laravel",
+    "version": "v1.0",
+    "description": "",
+    "keywords": [
+        "wdigital",
+        "klicktipp-for-laravel"
+    ],
+    "homepage": "https://github.com/wdigital/klicktipp-for-laravel",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Florian Würtenberger",
+            "email": "florian@wdigital.ch",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.4|^8.0",
+        "illuminate/support": "^8.0|^9.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.0|^7.0",
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WDigital\\KlickTippForLaravel\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WDigital\\KlickTippForLaravel\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "WDigital\\KlickTippForLaravel\\KlickTippForLaravelServiceProvider"
+            ],
+            "aliases": {
+                "KlickTippForLaravel": "WDigital\\KlickTippForLaravel\\KlickTippForLaravelFacade"
+            }
+        }
+    }
+}
