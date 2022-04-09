@@ -17,21 +17,27 @@ trait SessionTrait
 	protected function authentication(): array
 	{
 		$httpHeaders = [
-			'Accept'                => 'application/json',
-			'Content-Type'          => 'application/json',
+			'Accept'       => 'application/json',
+			'Content-Type' => 'application/json',
 		];
 
 		$authSession = Http::withHeaders($httpHeaders)->post(
-			config('klicktipp.api_base_url') . '/account/login',
+			config('klicktipp.api_base_url') . 'account/login.json',
 			[
 				'username' => config('klicktipp.api_username'),
 				'password' => config('klicktipp.api_password'),
 			]);
 
-		return [
-			'sessionIdentifier' => $authSession->header('cookie'),
-			'sessionStart'      => microtime(true),
-		];
+		if ($authSession->failed() === false) {
+			return [
+				'sessionIdentifier' => $authSession->json()['sessid'],
+				'sessionName'       => $authSession->json()['session_name'],
+				'sessionStart'      => microtime(true),
+			];
+		} else {
+			return [
+				'errorMessage' => 0,
+			];
+		}
 	}
-
 }

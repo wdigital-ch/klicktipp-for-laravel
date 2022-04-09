@@ -26,6 +26,11 @@ class KlickTippBaseService
 	protected string $sessionIdentifier = '';
 
 	/**
+	 * @var string $sessionName Value of the session identifier
+	 */
+	protected string $sessionName = '';
+
+	/**
 	 * @var PendingRequest $httpClient Laravel http client instance
 	 */
 	protected PendingRequest $httpClient;
@@ -40,11 +45,25 @@ class KlickTippBaseService
 
 	protected function callAuthentication()
 	{
-		$session                 = $this->authentication();
-		$this->sessionIdentifier = $session['sessionIdentifier'];
-		$this->sessionStart      = $session['sessionStart'];
+		$session = $this->authentication();
 
-		$this->initializeHttpClient();
+		if (!empty($session['errorMessage'])) {
+			$this->initializeHttpClient();
+			return $this->onAuthenticationError($session['errorMessage']);
+		}else {
+
+			$this->sessionIdentifier = $session['sessionIdentifier'];
+			$this->sessionName       = $session['sessionName'];
+			$this->sessionStart      = $session['sessionStart'];
+
+			$this->initializeHttpClient();
+		}
+
+	}
+
+	protected function onAuthenticationError($errorMessage)
+	{
+		return $this->httpClient;
 	}
 
 	/**
@@ -55,8 +74,9 @@ class KlickTippBaseService
 	public function initializeHttpClient()
 	{
 		$httpHeaders = [
-			'Accept'                => 'application/json',
-			'Content-Type'          => 'application/json',
+			'Accept'       => 'application/json',
+			'Content-Type' => 'application/json',
+			'Cookie'       => $this->sessionName . '=' . $this->sessionIdentifier,
 		];
 
 		$this->httpClient = Http::withOptions(
