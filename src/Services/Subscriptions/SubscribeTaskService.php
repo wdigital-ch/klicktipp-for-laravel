@@ -50,22 +50,36 @@ class SubscribeTaskService extends KlickTippBaseService
 		// Füge Daten zu Felder aus der KlickTipp ContactCloud
 		$fieldTaskServiceInstance     = FieldTaskService::getInstance();
 		$getFieldListFromContactCloud = $fieldTaskServiceInstance->fieldList();
+		//dd($getFieldListFromContactCloud);
 		$rebuildFieldFromContactCloud = KtFieldHelper::rebuildFieldsFromContactCloud($getFieldListFromContactCloud);
 		$requestFieldArray            = [];
 
 		// Entfernt die Underline im Key und schreibt den ersten Buchstaben nach dem Underline gross.
 		foreach ($fields as $fieldKey => $fieldValue) {
-			$explodeUnderlineFromInputFields = explode('_', $fieldKey);
-			$keyBeforeUnderline              = $explodeUnderlineFromInputFields[0];
-			$keyAfterUnderline               = $explodeUnderlineFromInputFields[1];
-			$keyAfterRecomposed              = $keyBeforeUnderline . ucfirst($keyAfterUnderline);
+			//dd(strpos($fieldKey, '_') !== false);
+			if (str_contains($fieldKey, '_')) {
+				$explodeUnderlineFromInputFields = explode('_', $fieldKey);
+				$keyBeforeUnderline              = $explodeUnderlineFromInputFields[0];
+				$keyAfterUnderline               = $explodeUnderlineFromInputFields[1];
+				$keyAfterRecomposed              = $keyBeforeUnderline . ucfirst($keyAfterUnderline);
+
+				//	dd($keyAfterRecomposed);
+			} else {
+				$keyAfterRecomposed = $fieldKey;
+			}
 
 			foreach ($rebuildFieldFromContactCloud as $fieldFromContactCloudKey => $fieldFromContactCloudValue) {
 				$inputFieldRebuildToContactCloudStringFormat = KtFieldHelper::rebuildField($keyAfterRecomposed);
 
 				// Überprüft ob der ContactCloudKey mit dem gerade übergebenen Feld zusammenpasst und setzt den Wert zum jeweiligen Feld.
-				if ($fieldFromContactCloudKey === $inputFieldRebuildToContactCloudStringFormat) {
-					$requestFieldArray['fields'][$fieldFromContactCloudKey][] = $fieldValue;
+				if ($fieldFromContactCloudValue === ucfirst($keyAfterRecomposed)) {
+					$requestFieldArray['fields'][$inputFieldRebuildToContactCloudStringFormat] = $fieldValue;
+				}
+
+				foreach ($getFieldListFromContactCloud as $contactCloudFieldKey => $contactCloudFieldValue) {
+					if ($contactCloudFieldValue === 'Affiliate ID') {
+						$requestFieldArray['fields'][$contactCloudFieldKey] = '12345567';
+					}
 				}
 			}
 		}
