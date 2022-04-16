@@ -11,7 +11,7 @@ class KtTagHelper
 	 *
 	 * @return bool|array
 	 */
-	public function searchTagByName(array $tagList, string $tagName): bool|array
+	public static function searchTagByName(array $tagList, string $tagName): bool|array
 	{
 		foreach ($tagList as $tagKey => $tagValue) {
 			if ($tagValue == $tagName) {
