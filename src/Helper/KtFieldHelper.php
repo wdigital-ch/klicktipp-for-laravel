@@ -14,8 +14,8 @@ class KtFieldHelper
 	{
 		$newFieldArray = [];
 
-		foreach ($fields as $field) {
-			$newFieldArray[] = ucfirst(explode('field', $field)[1]);
+		foreach ($fields as $fieldKey => $fieldValue) {
+			$newFieldArray[] = ucfirst(explode('field', $fieldKey)[1]);
 		}
 
 		return $newFieldArray;
@@ -29,6 +29,6 @@ class KtFieldHelper
 	public static function rebuildField(string $field): string
 	{
 		$addKeyToString = 'field';
-		return $addKeyToString . $field;
+		return $addKeyToString . ucfirst($field);
 	}
 }
