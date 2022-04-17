@@ -1,4 +1,9 @@
 <?php
+/*
+ * Copyright (c) - WDigital - 2022.
+ * @link https://wdigital.ch
+ * @developer Florian Würtenberger <florian@wdigital.ch>
+ */
 
 namespace WDigital\KlickTippForLaravel\Helper;
 
@@ -12,12 +17,9 @@ class KtResponsesHelper
 	 */
 	public static function getResponsesError(int $errorStatus, string $errorMessage): array
 	{
-		$rebuildErrorMessage = self::rebuildStatusCodeText($errorMessage);
-
 		return [
-			'errorStatus'     => $errorStatus,
-			'errorStatusText' => $rebuildErrorMessage['codeStatusText'],
-			'errorMessage'    => $rebuildErrorMessage['text'],
+			'errorStatus'  => $errorStatus,
+			'errorMessage' => $errorMessage,
 		];
 	}
 
@@ -27,7 +29,7 @@ class KtResponsesHelper
 	 *
 	 * @return array
 	 */
-	public static function getResponsesSuccess(int $successStatus, string $successMessage)
+	public static function getResponsesSuccess(int $successStatus, string $successMessage): array
 	{
 		return [
 			'successStatus'  => $successStatus,
@@ -40,13 +42,20 @@ class KtResponsesHelper
 	 *
 	 * @return array
 	 */
-	private static function rebuildStatusCodeText($text): array
+	private static function rebuildStatusCodeText($status, $text): array
 	{
-		$explodeText = explode(' : ', $text);
+		if (str_contains($text, ' : ')) {
+			$explodeText = explode(' : ', $text);
+
+			return [
+				'codeStatusText' => $explodeText[0],
+				'text'           => $explodeText[1],
+			];
+		}
 
 		return [
-			'codeStatusText' => $explodeText[0],
-			'text'           => $explodeText[1],
+			'codeStatusText' => $status,
+			'text'           => $text,
 		];
 	}
 }

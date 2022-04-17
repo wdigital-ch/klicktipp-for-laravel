@@ -96,9 +96,9 @@ class TagsTaskService extends KlickTippBaseService
 	}
 
 	/**
-	 * @param int         $tagId          ID des manuellen Tags/SmartLinks
-	 * @param string|null $tagName        optional: Name des manuellen Tags/SmartLinks
-	 * @param string|null $tagDescription optional: zusätzliche Informationen
+	 * @param int         $tagId          // ID des manuellen Tags/SmartLinks
+	 * @param string|null $tagName        // optional: Name des manuellen Tags/SmartLinks
+	 * @param string|null $tagDescription // optional: zusätzliche Informationen
 	 *
 	 * @return mixed
 	 */
@@ -109,17 +109,22 @@ class TagsTaskService extends KlickTippBaseService
 			"text" => $tagDescription,
 		];
 
-		$ktTagResponse = $this->httpClient->put('tag/' . $tagId, $requestData);
+		$ktTagResponse = $this->httpClient->put('tag/' . $tagId . '', $requestData);
 
 		if ($ktTagResponse->status() === 200) {
-			return 'Tag mit der ID: ' . $ktTagResponse . 'wurde erfolgreich aktualisiert.';
+			if (in_array(true, $ktTagResponse->json()) == true) {
+				return KtResponsesHelper::getResponsesSuccess($ktTagResponse->status(), 'Tag mit der ID: ' . $tagId . ' wurde erfolgreich aktualisiert.');
+			}
+
+			return KtResponsesHelper::getResponsesSuccess($ktTagResponse->status(), $ktTagResponse->json());
+
 		} else {
-			return KtResponsesHelper::getResponsesError($ktTagResponse->status(), $ktTagResponse);
+			return KtResponsesHelper::getResponsesError($ktTagResponse->status(), $ktTagResponse->json());
 		}
 	}
 
 	/**
-	 * @param int $tagId ID des manuellen Tags / SmartLinks
+	 * @param int $tagId // ID des manuellen Tags / SmartLinks
 	 *
 	 * @return mixed
 	 */
@@ -134,6 +139,4 @@ class TagsTaskService extends KlickTippBaseService
 			return KtResponsesHelper::getResponsesError($ktTagResponse->status(), $ktTagResponse->reason());
 		}
 	}
-
-
 }

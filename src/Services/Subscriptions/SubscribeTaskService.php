@@ -1,4 +1,9 @@
 <?php
+/*
+ * Copyright (c) - WDigital - 2022.
+ * @link https://wdigital.ch
+ * @developer Florian Würtenberger <florian@wdigital.ch>
+ */
 
 namespace WDigital\KlickTippForLaravel\Services\Subscriptions;
 
@@ -45,12 +50,21 @@ class SubscribeTaskService extends KlickTippBaseService
 	 *
 	 * @return mixed
 	 */
-	public function subscribe(string $email, int $subscriptionProcessId = 0, int $tagId = 0, array $fields = [], string $smsNumber = null): mixed
+	public function subscribe(string $email, int $subscriptionProcessId = 0, int $tagId = 0, array $fields = [], array $optionalFields = [], string $smsNumber = null): mixed
 	{
-		// Füge Daten zu Felder aus der KlickTipp ContactCloud
+		// Überprüft ob die E-Mail-Addresse schon vorhanden ist.
+		if (isset($this->searchSubscriberByEmail($email)['errorStatus']) === true && $this->searchSubscriberByEmail($email)['errorStatus'] === 404) {
+			return $this->searchSubscriberByEmail($email);
+		}
+
+		if (isset($this->searchSubscriberByEmail($email)['data']['successStatus']) === true && $this->searchSubscriberByEmail($email)['data']['successStatus'] === 200) {
+			return $this->updateSubscribe($email, $this->searchSubscriberByEmail($email)['contactCloudId'], $fields, $optionalFields);
+		}
+
+		// Füge Daten zu Felder aus der KlickTipp ContactCloud.
 		$fieldTaskServiceInstance     = FieldTaskService::getInstance();
 		$getFieldListFromContactCloud = $fieldTaskServiceInstance->fieldList();
-		//dd($getFieldListFromContactCloud);
+
 		$rebuildFieldFromContactCloud = KtFieldHelper::rebuildFieldsFromContactCloud($getFieldListFromContactCloud);
 		$requestFieldArray            = [];
 
@@ -62,8 +76,6 @@ class SubscribeTaskService extends KlickTippBaseService
 				$keyBeforeUnderline              = $explodeUnderlineFromInputFields[0];
 				$keyAfterUnderline               = $explodeUnderlineFromInputFields[1];
 				$keyAfterRecomposed              = $keyBeforeUnderline . ucfirst($keyAfterUnderline);
-
-				//	dd($keyAfterRecomposed);
 			} else {
 				$keyAfterRecomposed = $fieldKey;
 			}
@@ -77,8 +89,10 @@ class SubscribeTaskService extends KlickTippBaseService
 				}
 
 				foreach ($getFieldListFromContactCloud as $contactCloudFieldKey => $contactCloudFieldValue) {
-					if ($contactCloudFieldValue === 'Affiliate ID') {
-						$requestFieldArray['fields'][$contactCloudFieldKey] = '12345567';
+					foreach ($optionalFields as $optionalFieldNameKey => $optionalFieldNameValue) {
+						if ($contactCloudFieldValue === $optionalFieldNameKey) {
+							$requestFieldArray['fields'][$contactCloudFieldKey] = $optionalFieldNameValue;
+						}
 					}
 				}
 			}
@@ -89,12 +103,87 @@ class SubscribeTaskService extends KlickTippBaseService
 		$requestFieldArray['tagid']     = $tagId;
 		$requestFieldArray['smsnumber'] = ($smsNumber != null) ? $smsNumber : '';
 
-		$ktTagResponse = $this->httpClient->post('subscriber', $requestFieldArray);
+		$ktTagResponse = $this->httpClient->post('subscriber.json', $requestFieldArray);
 
 		if ($ktTagResponse->status() === 200) {
 			return $ktTagResponse->json();
 		} else {
 			return KtResponsesHelper::getResponsesError($ktTagResponse->status(), $ktTagResponse);
+		}
+
+	}
+
+	/**
+	 * @param string $emailAddress // E-Mail-Adresse des Empfängers
+	 *
+	 * @return array
+	 */
+	public function searchSubscriberByEmail(string $emailAddress): array
+	{
+		$requestArray = [
+			'email' => $emailAddress,
+		];
+
+		$ktTagResponse = $this->httpClient->post('subscriber/search', $requestArray);
+
+		if ($ktTagResponse->status() === 200) {
+			return [
+				'data'           => KtResponsesHelper::getResponsesSuccess($ktTagResponse->status(), 'Für diesen Empfänger (' . $emailAddress . ') gibt es schon ein Konto.'),
+				'contactCloudId' => (int)$ktTagResponse->json()[0],
+			];
+		} else {
+			return KtResponsesHelper::getResponsesError($ktTagResponse->status(), 'Diesen Empfänger (' . $emailAddress . ') gibt es nicht.');
+		}
+	}
+
+	public function updateSubscribe(string $newEmail, int $contactCloudId, array $fields = [], array $optionalFields = [], string $smsNumber = null)
+	{
+		//dd($newEmail, $contactCloudId, $fields, $optionalFields);
+		// Füge Daten zu Felder aus der KlickTipp ContactCloud.
+		$fieldTaskServiceInstance     = FieldTaskService::getInstance();
+		$getFieldListFromContactCloud = $fieldTaskServiceInstance->fieldList();
+
+		$rebuildFieldFromContactCloud = KtFieldHelper::rebuildFieldsFromContactCloud($getFieldListFromContactCloud);
+		$requestFieldArray            = [];
+
+		// Entfernt die Underline im Key und schreibt den ersten Buchstaben nach dem Underline gross.
+		foreach ($fields as $fieldKey => $fieldValue) {
+
+			if (str_contains($fieldKey, '_')) {
+				$explodeUnderlineFromInputFields = explode('_', $fieldKey);
+				$keyBeforeUnderline              = $explodeUnderlineFromInputFields[0];
+				$keyAfterUnderline               = $explodeUnderlineFromInputFields[1];
+				$keyAfterRecomposed              = $keyBeforeUnderline . ucfirst($keyAfterUnderline);
+			} else {
+				$keyAfterRecomposed = $fieldKey;
+			}
+
+			foreach ($rebuildFieldFromContactCloud as $fieldFromContactCloudKey => $fieldFromContactCloudValue) {
+				$inputFieldRebuildToContactCloudStringFormat = KtFieldHelper::rebuildField($keyAfterRecomposed);
+
+				// Überprüft ob der ContactCloudKey mit dem gerade übergebenen Feld zusammenpasst und setzt den Wert zum jeweiligen Feld.
+				if ($fieldFromContactCloudValue === ucfirst($keyAfterRecomposed)) {
+					$requestFieldArray['fields'][$inputFieldRebuildToContactCloudStringFormat] = $fieldValue;
+				}
+
+				foreach ($getFieldListFromContactCloud as $contactCloudFieldKey => $contactCloudFieldValue) {
+					foreach ($optionalFields as $optionalFieldNameKey => $optionalFieldNameValue) {
+						if ($contactCloudFieldValue === $optionalFieldNameKey) {
+							$requestFieldArray['fields'][$contactCloudFieldKey] = $optionalFieldNameValue;
+						}
+					}
+				}
+			}
+		}
+
+		$ktTagResponse = $this->httpClient->put('/subscriber/' . $contactCloudId, $requestFieldArray);
+
+		if ($ktTagResponse->status() === 200) {
+			return [
+				'data' => KtResponsesHelper::getResponsesSuccess($ktTagResponse->status(), 'Der Datensatz für den Empfänger (' . $newEmail . ') wurde erfolgreich aktualisiert.'),
+			];
+		} else {
+			return KtResponsesHelper::getResponsesError($ktTagResponse->status(), 'Diesen Empfänger (' . $newEmail . ') gibt es nicht.');
 		}
 	}
 }
