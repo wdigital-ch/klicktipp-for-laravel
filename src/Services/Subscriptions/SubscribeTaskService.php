@@ -53,9 +53,10 @@ class SubscribeTaskService extends KlickTippBaseService
 	public function subscribe(string $email, int $subscriptionProcessId = 0, int $tagId = 0, array $fields = [], array $optionalFields = [], string $smsNumber = null): mixed
 	{
 		// Überprüft ob die E-Mail-Addresse schon vorhanden ist.
-		if (isset($this->searchSubscriberByEmail($email)['errorStatus']) === true && $this->searchSubscriberByEmail($email)['errorStatus'] === 404) {
-			return $this->searchSubscriberByEmail($email);
-		}
+		/*	if (isset($this->searchSubscriberByEmail($email)['errorStatus']) === true && $this->searchSubscriberByEmail($email)['errorStatus'] === 404) {
+				dd($this->searchSubscriberByEmail($email));
+				return $this->searchSubscriberByEmail($email);
+			}*/
 
 		if (isset($this->searchSubscriberByEmail($email)['data']['successStatus']) === true && $this->searchSubscriberByEmail($email)['data']['successStatus'] === 200) {
 			return $this->updateSubscribe($email, $this->searchSubscriberByEmail($email)['contactCloudId'], $fields, $optionalFields);
@@ -88,10 +89,12 @@ class SubscribeTaskService extends KlickTippBaseService
 					$requestFieldArray['fields'][$inputFieldRebuildToContactCloudStringFormat] = $fieldValue;
 				}
 
-				foreach ($getFieldListFromContactCloud as $contactCloudFieldKey => $contactCloudFieldValue) {
-					foreach ($optionalFields as $optionalFieldNameKey => $optionalFieldNameValue) {
-						if ($contactCloudFieldValue === $optionalFieldNameKey) {
-							$requestFieldArray['fields'][$contactCloudFieldKey] = $optionalFieldNameValue;
+				if (!empty($optionalFields)) {
+					foreach ($getFieldListFromContactCloud as $contactCloudFieldKey => $contactCloudFieldValue) {
+						foreach ($optionalFields as $optionalFieldNameKey => $optionalFieldNameValue) {
+							if ($contactCloudFieldValue === $optionalFieldNameKey) {
+								$requestFieldArray['fields'][$contactCloudFieldKey] = $optionalFieldNameValue;
+							}
 						}
 					}
 				}
@@ -136,9 +139,17 @@ class SubscribeTaskService extends KlickTippBaseService
 		}
 	}
 
-	public function updateSubscribe(string $newEmail, int $contactCloudId, array $fields = [], array $optionalFields = [], string $smsNumber = null)
+	/**
+	 * @param string      $newEmail
+	 * @param int         $contactCloudId
+	 * @param array       $fields
+	 * @param array       $optionalFields
+	 * @param string|null $smsNumber
+	 *
+	 * @return array
+	 */
+	public function updateSubscribe(string $newEmail, int $contactCloudId, array $fields = [], array $optionalFields = [], string $smsNumber = null): array
 	{
-		//dd($newEmail, $contactCloudId, $fields, $optionalFields);
 		// Füge Daten zu Felder aus der KlickTipp ContactCloud.
 		$fieldTaskServiceInstance     = FieldTaskService::getInstance();
 		$getFieldListFromContactCloud = $fieldTaskServiceInstance->fieldList();
@@ -166,10 +177,12 @@ class SubscribeTaskService extends KlickTippBaseService
 					$requestFieldArray['fields'][$inputFieldRebuildToContactCloudStringFormat] = $fieldValue;
 				}
 
-				foreach ($getFieldListFromContactCloud as $contactCloudFieldKey => $contactCloudFieldValue) {
-					foreach ($optionalFields as $optionalFieldNameKey => $optionalFieldNameValue) {
-						if ($contactCloudFieldValue === $optionalFieldNameKey) {
-							$requestFieldArray['fields'][$contactCloudFieldKey] = $optionalFieldNameValue;
+				if (!empty($optionalFields)) {
+					foreach ($getFieldListFromContactCloud as $contactCloudFieldKey => $contactCloudFieldValue) {
+						foreach ($optionalFields as $optionalFieldNameKey => $optionalFieldNameValue) {
+							if ($contactCloudFieldValue === $optionalFieldNameKey) {
+								$requestFieldArray['fields'][$contactCloudFieldKey] = $optionalFieldNameValue;
+							}
 						}
 					}
 				}
